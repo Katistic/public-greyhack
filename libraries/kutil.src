@@ -15,7 +15,7 @@ kutil.sudo = function(username, password)
 end function
 
 // Returns a map object, of structure:
-// {"127.0.0.1": {"port": 1111, "status": "open", "service": {"name": "http", "version": "1.0.0"}}, ...}
+// {"127.0.0.1": [{"port": 1111, "status": "open", "service": {"name": "http", "version": "1.0.0"}}, ...], ...}
 // Just a modularized nmap
 kutil.nmap = function(target_ip)
 	if not is_valid_ip(target_ip) then return "Invalid IP address"
@@ -42,7 +42,7 @@ kutil.nmap = function(target_ip)
        
 	if(ports.len == 0) then return null
 	
-	// ip: {"port": 1111, "status": "open", "service": {"name": "http", "version": "1.0.0"}}
+	// ip: [{"port": 1111, "status": "open", "service": {"name": "http", "version": "1.0.0"}}, ...]
 	all_ports = {}
 
 	for port in ports
