@@ -108,3 +108,28 @@ kutil.is_number = function(stringer)
 	return true
 end function
 
+kutil.get_input_from_list = function(prompt, list)
+	selected = null
+	
+	while_checks = function(selected, list)
+		if not typeof(selected) == "number" then return false
+		if not 0 < selected then return false
+		if not list.len + 1 > selected then return false
+		return true
+	end function
+
+	while not while_checks(selected, list)
+		clear_screen()
+		print(prompt)
+		for i in range(1, list.len)
+			print(str(i) + ". " + list[i-1])
+		end for
+		selected = user_input(">>> ", false, true)
+	
+		if kutil.is_number(selected) then selected = selected.to_int()
+	end while
+
+	selected = selected - 1
+	return list[selected]
+end function
+
