@@ -90,3 +90,21 @@ kutil.whois = function(target_ip)
     return who_is
 end function
 
+kutil.is_number = function(stringer)
+	numbers = "1234567890"
+	if stringer.trim() == "" then return false
+	
+	for character in stringer
+		num = false
+		for number in numbers
+			if character == number then
+				num = true
+				break
+			end if
+		end for
+		if num == false then return false
+	end for
+
+	return true
+end function
+
