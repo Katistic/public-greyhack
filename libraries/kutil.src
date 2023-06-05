@@ -1,0 +1,92 @@
+// kutil module v0.1.0
+//
+// Functions:
+// kutil.sudo(username:String, password:String) -> shell
+// kutil.nmap(ipAddress:String) -> map[ip:String, map[string, Union[String, Number, map[String, String] ] ] ]
+// kutil.whois(ipAddress:String) -> map[String, String]
+
+kutil = {}
+
+// Returns a shell
+// Just a modularized sudo -u
+kutil.sudo = function(username, password)
+    shell = get_shell(username, password)
+    return shell
+end function
+
+// Returns a map object, of structure:
+// {"127.0.0.1": {"port": 1111, "status": "open", "service": {"name": "http", "version": "1.0.0"}}, ...}
+// Just a modularized nmap
+kutil.nmap = function(target_ip)
+	if not is_valid_ip(target_ip) then return "Invalid IP address"
+
+	isLanIp = is_lan_ip(target_ip)
+
+	if isLanIp then
+		router = get_router();
+	else 
+		router = get_router(target_ip)
+	end if
+
+	if router == null then return "IP address not found"
+	ports = null
+
+	if not isLanIp then
+		ports = router.used_ports()
+	else
+		ports = router.device_ports(target_ip)
+	end if
+
+	if ports == null then return "IP address not found"
+	if typeof(ports) == "string" then exit(ports)
+       
+	if(ports.len == 0) then return null
+	
+	// ip: {"port": 1111, "status": "open", "service": {"name": "http", "version": "1.0.0"}}
+	all_ports = {}
+
+	for port in ports
+		service_info = router.port_info(port)
+		lan_ips = port.get_lan_ip()
+		port_status = "open"
+
+		if(port.is_closed and not isLanIp) then
+			port_status = "closed"
+		end if
+		
+        s_name = service_info.split(" ")[0]
+        s_ver = service_info.split(" ")[1]
+		if all_ports.hasIndex(lan_ips) then
+			all_ports[lan_ips].push({"port": port.port_number(), "status": port_status, "service": {"name": s_name, "version": s_ver}})
+		else
+			all_ports[lan_ips] = [{"port": port.port_number(), "status": port_status, "service": {"name": s_name, "version": s_ver}}]
+		end if
+	end for
+	
+	return all_ports
+end function
+
+// Returns map of data about a target ip address
+// Or a string if theres an error
+// Just a modularized whois
+// KEYS:
+// domain_name
+// administrative_contact
+// email_address
+// phone
+kutil.whois = function(target_ip)
+    if not is_valid_ip(target_ip) then return "Invalid IP Address"
+    if is_lan_ip(target_ip) then return "Must be a public IP"
+    result = whois(target_ip).split("\n")
+
+    who_is = {}
+    for x in result
+        if x["key"].trim() == "" then continue
+        key = x["key"].lower().trim().replace(" ", "_")
+
+        who_is[key] = x["value"].trim()
+    end for
+
+    return who_is
+end function
+
