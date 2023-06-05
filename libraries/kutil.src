@@ -133,3 +133,10 @@ kutil.get_input_from_list = function(prompt, list)
 	return list[selected]
 end function
 
+kutil.add_lists = function(list1, list2)
+	for value in list2
+		list1.push(value)
+	end for
+
+	return list1
+end function
