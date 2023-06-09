@@ -66,6 +66,18 @@ kutil.nmap = function(target_ip)
 	return all_ports
 end function
 
+kutil.deepscan = function(ip)
+	if is_lan_ip(ip) then
+		ip = ip[:ip.lastIndexOf(".")] + ".1"
+	end if
+
+	router = get_router(ip)
+	if router == null then return "IP Address not found."
+
+	devices = router.devices_lan_ip()
+	
+end if
+
 // Returns map of data about a target ip address
 // Or a string if theres an error
 // Just a modularized whois
